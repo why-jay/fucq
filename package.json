@@ -12,5 +12,17 @@
     "test": "./runTest.sh"
   },
   "author": "YJ Yang <chcokr@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chcokr/fucq.git"
+  },
+  "keywords": [
+    "queue",
+    "fifo"
+  ],
+  "bugs": {
+    "url": "https://github.com/chcokr/fucq/issues"
+  },
+  "homepage": "https://github.com/chcokr/fucq"
 }
