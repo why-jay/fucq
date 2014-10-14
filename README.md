@@ -12,7 +12,7 @@ npm install fucq
 
 #Example
 
-```
+```JavaScript
 var Fucq = require('fucq');
 var assert = require('assert');
 
