@@ -63,5 +63,6 @@ q.empty(function (err) { // "empty" method
 Test is written in ES6, so Regenerator, 6to5 and Bash are being used for transpilation.
 
 ```
+npm install
 npm test
 ```
