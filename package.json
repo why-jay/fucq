@@ -1,0 +1,16 @@
+{
+  "name": "fucq",
+  "version": "0.1.0",
+  "description": "Fixed-capacity FIFO queue that enforces uniqueness among elements, using Redis.",
+  "main": "main.js",
+  "devDependencies": {
+    "bluebird": "2.3.5",
+    "lodash": "2.4.1",
+    "redis": "0.12.1"
+  },
+  "scripts": {
+    "test": "./runTest.sh"
+  },
+  "author": "YJ Yang <chcokr@gmail.com>",
+  "license": "MIT"
+}
