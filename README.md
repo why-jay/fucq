@@ -4,13 +4,13 @@
 
 Fixed-capacity FIFO queue that enforces uniqueness among elements, using Redis. Every operation is O(1).
 
-#Install
+##Install
 
 ```
 npm install fucq
 ```
 
-#Example
+##Example
 
 ```JavaScript
 var Fucq = require('fucq');
@@ -58,7 +58,7 @@ q.empty(function (err) { // "empty" method
 });
 ```
 
-#Test
+##Test
 
 Test is written in ES6, so Regenerator, 6to5 and Bash are being used for transpilation.
 
