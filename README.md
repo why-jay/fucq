@@ -18,7 +18,7 @@ var assert = require('assert');
 
 var q = Fucq.create({
     client: redisClient,
-    key: 'foo:1',
+    key: 'foo:1', // Redis key name
     capacity: 2
 });
 
