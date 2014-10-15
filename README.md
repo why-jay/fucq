@@ -2,7 +2,9 @@
 
 (acronym intended)
 
-Fixed-capacity FIFO queue that enforces uniqueness among elements, using Redis. Every operation is O(1).
+Fixed-capacity FIFO queue that enforces uniqueness among elements, using Redis.
+
+Every operation is O(1).
 
 ##Install
 
