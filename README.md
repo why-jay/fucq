@@ -15,10 +15,10 @@ npm install fucq
 ##Example
 
 ```JavaScript
-var Fucq = require('fucq');
+var fucq = require('fucq');
 var assert = require('assert');
 
-var q = Fucq.create({
+var q = fucq.create({
     client: redisClient,
     key: 'foo:1', // Redis key name
     capacity: 2
@@ -31,22 +31,22 @@ q.empty(function (err) { // "empty" method
     q.add('a', function (err, res) { // queue is now ['a']
         if (err) throw err;
         
-        assert.strictEqual(res, Fucq.OK); // status OK
+        assert.strictEqual(res, q.OK); // status OK
     
         q.add('b', function (err, res) { // queue is now ['b', 'a']
             if (err) throw err;
             
-            assert.strictEqual(res, Fucq.OK);
+            assert.strictEqual(res, q.OK);
     
             q.add('c', function (err, res) { // queue is now ['c', 'b']
                 if (err) throw err;
                 
-                assert.strictEqual(res, Fucq.OK);
+                assert.strictEqual(res, q.OK);
                 
                 q.add('c', function (err, res) { // duplicate cannot be added
                     if (err) throw err;
                     
-                    assert.strictEqual(res, Fucq.DUP_ENTRY); // status DUP_ENTRY
+                    assert.strictEqual(res, q.DUP_ENTRY); // status DUP_ENTRY
                     
                     q.size(function (err, res) { // "size" method (asynchronous)
                         if (err) throw err;

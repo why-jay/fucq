@@ -5,18 +5,14 @@ var codes = {
     OK: 0
 };
 
-var script = '\
-    if redis.call("SISMEMBER", KEYS[1], ARGV[1]) == 1 then\
-        return ' + codes.DUP_ENTRY + '\
-    else\
-        redis.call("SADD", KEYS[1], ARGV[1])\
-        redis.call("LPUSH", KEYS[2], ARGV[1])\
-        if redis.call("LLEN", KEYS[2]) > tonumber(ARGV[2]) then\
-            redis.call("SREM", KEYS[1], redis.call("RPOP", KEYS[2]))\
-        end\
-        return ' + codes.OK + '\
-    end\
-';
+function generateArgvStr(startIndex, endIndex) { // endIndex IS INCLUDED
+    var len = endIndex + 1 - startIndex;
+    var range = [];
+    for (var i = 0; i < len; ++i) {
+        range.push('ARGV[' + (startIndex + i) +']');
+    }
+    return range.join(', ');
+}
 
 var create = function (options) {
     var client = options.client;
@@ -26,57 +22,92 @@ var create = function (options) {
     var setKey = key + ':set';
     var listKey = key + ':list';
 
-    var add = function (item, cb) {
-        client.eval(
-            script,
-            2, setKey, listKey, // KEYS[]
-            item, capacity, // ARGV[]
-            function (err, res) {
-                if (err) {
-                    cb(err);
-                    return;
-                }
+    function add() {
+        var argsCount = arguments.length - 1;
+        var args = [];
+        for (var i = 0; i < argsCount; ++i) {
+            args.push(arguments[i]);
+        }
+        var cb = arguments[argsCount];
 
-                cb(null, res);
-            }
-        );
-    };
+        var argvStr = generateArgvStr(1, argsCount);
+        var subArgvStr = generateArgvStr(1, argsCount - capacity) || '""';
 
-    var empty = function (cb) {
+        var script = '\
+            local setKey = KEYS[1]\
+            local listKey = KEYS[2]\
+\
+            local argsCount = tonumber(#ARGV - 1)\
+            local capacity = tonumber(ARGV[#ARGV])\
+\
+            for i=1,argsCount do\
+                if redis.call("SISMEMBER", setKey, ARGV[i]) == 1 then\
+                    return ' + codes.DUP_ENTRY + '\
+                end\
+            end\
+\
+            redis.call("SADD", setKey, ' + argvStr + ')\
+\
+            local emptyCount = capacity - redis.call("LLEN", listKey)\
+\
+            if argsCount <= emptyCount then\
+                redis.call("LPUSH", listKey, ' + argvStr + ')\
+                redis.call("SADD", setKey, ' + argvStr + ')\
+            elseif argsCount >= capacity then\
+                redis.call("DEL", listKey)\
+                redis.call("DEL", setKey)\
+                redis.call("LPUSH", listKey, ' + subArgvStr + ')\
+                redis.call("SADD", setKey, ' + subArgvStr + ')\
+            else\
+                for i = 1,(argsCount - emptyCount) do\
+                    redis.call("SREM", setKey, redis.call("RPOP", listKey))\
+                end\
+                redis.call("LPUSH", listKey, ' + argvStr + ')\
+            end\
+\
+            return ' + codes.OK + '\
+        ';
+
+        var evalArgs = [];
+        evalArgs.push(script);
+        evalArgs.push(2);
+        evalArgs.push(setKey); // KEYS[1]
+        evalArgs.push(listKey); // KEYS[2]
+        for (i = 0; i < argsCount; ++i) {
+            evalArgs.push(args[i]); // ARGV[1] ... ARGV[argsCount]
+        }
+        evalArgs.push(capacity); // ARGV[argCnt + 1]
+        evalArgs.push(cb);
+
+        client.eval.apply(client, evalArgs);
+    }
+
+    function all(cb) {
+        client.lrange(listKey, 0, -1, cb);
+    }
+
+    function empty(cb) {
         client.multi()
             .del(key + ':set')
             .del(key + ':list')
-            .exec(function (err) {
-                if (err) {
-                    cb(err);
-                    return;
-                }
+            .exec(cb);
+    }
 
-                cb(null);
-            })
-    };
+    function size(cb) {
+        client.llen(listKey, cb);
+    }
 
-    var size = function (cb) {
-        client.llen(listKey, function (err, res) {
-            if (err) {
-                cb(err);
-                return;
-            }
+    var fucqInstance = Object.create(codes);
+    fucqInstance.add = add;
+    fucqInstance.all = all;
+    fucqInstance.capacity = capacity;
+    fucqInstance.empty = empty;
+    fucqInstance.size = size;
 
-            cb(null, res);
-        });
-    };
-
-    return {
-        add: add,
-        capacity: capacity,
-        empty: empty,
-        size: size
-    };
+    return fucqInstance;
 };
 
-var Fucq = Object.create(codes);
+var fucq = Object.create(codes);
+fucq.create = create;
 
-Fucq.create = create;
-
-module.exports = Fucq;
+module.exports = fucq;
