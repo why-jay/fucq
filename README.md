@@ -26,9 +26,9 @@ var fucq = require('fucq');
 var assert = require('assert');
 
 var q = fucq.create({
-    client: redisClient,
-    key: 'foo:1', // Redis key name
-    capacity: QUEUE_CAPACITY,
+    client: redisClient, // required
+    key: 'foo:1', // required - Redis key name
+    capacity: QUEUE_CAPACITY, // required
     serialize: function (numericResult) { // optional
         // If not set, a default serializer is used (which is basically a JSON.stringify() that can handle undefined)
         // Redis can only store strings, so everything needs to be converted to and from a string.
