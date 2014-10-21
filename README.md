@@ -6,8 +6,8 @@ Fixed-capacity FIFO queue that enforces uniqueness among elements, using Redis.
 
 Every operation requires only one I/O to and from Redis, minimizing I/O overhead.
 
-- Adding N items takes O(N) time
-- Fetching all N items in queue takes O(1) time with Redis, but O(N) time because of deserialization
+- Adding N items takes O(N) time.
+- Fetching all N items in queue takes O(1) time with Redis, but O(N) time because of deserialization.
 - Everything else is O(1).
 
 ##Install
@@ -25,6 +25,7 @@ var QUEUE_CAPACITY = 3;
 
 var fucq = require('fucq');
 var assert = require('assert');
+var Bluebird = require('bluebird');
 
 var q = fucq.create({
     client: redisClient, // required
