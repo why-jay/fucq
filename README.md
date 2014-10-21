@@ -7,7 +7,7 @@ Fixed-capacity FIFO queue that enforces uniqueness among elements, using Redis.
 Every operation requires only one I/O to and from Redis, minimizing I/O overhead.
 
 - Adding N items takes O(N) time
-- Fetching all N items in queue takes O(1) time with Redis but O(N) time because of deserialization
+- Fetching all N items in queue takes O(1) time with Redis, but O(N) time because of deserialization
 - Everything else is O(1).
 
 ##Install
@@ -31,12 +31,14 @@ var q = fucq.create({
     key: 'foo:1', // required - Redis key name
     capacity: QUEUE_CAPACITY, // required
     serialize: function (numericResult) { // optional
-        // If not set, a default serializer is used (which is basically a JSON.stringify() that can handle undefined)
-        // Redis can only store strings, so everything needs to be converted to and from a string.
+        // If not set, a default serializer is used (which is basically a JSON.stringify()
+        // that can handle undefined). Redis can only store strings, so everything needs
+        // to be converted to and from a string.
         return String(numericResult);
     }
-    deserialize: function (stringStored) { // optional - similar to the "serialize" option above
-        // If not set, a default deserializer is used (which is basically a JSON.parse() that can handle undefined)
+    deserialize: function (stringStored) { // optional - similar to serialize
+        // If not set, a default deserializer is used (which is basically a JSON.parse()
+        // that can handle undefined)
         return Number(stringStored);
     }
 });
@@ -61,7 +63,8 @@ Bluebird.coroutine(function* () {
 
     console.log(yield q.allAsync()); // method .all()
     // prints [4, 3, 2]
-    // instead of ['4', '3', '2'] which a plain ol' Redis call would return without a deserializer
+    // instead of ['4', '3', '2']
+    // which a plain ol' Redis call would return without a deserializer
     
     assert.strictEqual(yield q.sizeAsync(), QUEUE_CAPACITY); // method .size() - asynchronous
 })();
