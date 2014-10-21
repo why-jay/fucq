@@ -5,9 +5,10 @@
 Fixed-capacity FIFO queue that enforces uniqueness among elements, using Redis.
 
 Every operation requires only one I/O to and from Redis, minimizing I/O overhead.
-Adding N items takes O(N) time;
-fetching all N items in queue takes O(1) time with Redis but O(N) time because of deserialization; 
-everything else is O(1).
+
+- Adding N items takes O(N) time
+- Fetching all N items in queue takes O(1) time with Redis but O(N) time because of deserialization
+- Everything else is O(1).
 
 ##Install
 
