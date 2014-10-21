@@ -1,6 +1,6 @@
 {
   "name": "fucq",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Fixed-capacity FIFO queue that enforces uniqueness among elements, using Redis.",
   "main": "main.js",
   "devDependencies": {

@@ -31,7 +31,7 @@ Bluebird.coroutine(function* () {
     console.timeEnd(`Adding ${ITERATIONS}*${BULK_ADD_COUNT} items took`);
 
     const range = _.range(ITERATIONS * BULK_ADD_COUNT);
-    assert.deepEqual(yield q.allAsync(), _(range).last(QUEUE_CAPACITY).reverse().value());
+    assert(_.isEqual(yield q.allAsync(), _(range).last(QUEUE_CAPACITY).reverse().value()));
 
     for (i of _.last(range, QUEUE_CAPACITY)) {
         assert.strictEqual(yield q.addAsync(i), q.DUP_ENTRY);

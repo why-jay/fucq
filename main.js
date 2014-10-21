@@ -14,10 +14,27 @@ function generateArgvStr(startIndex, endIndex) { // endIndex IS INCLUDED
     return range.join(', ');
 }
 
+function defaultSerialize(result) {
+    if (result === undefined) {
+        return '__fucq_undefined__';
+    }
+    return JSON.stringify(result);
+}
+
+function defaultDeserialize(str) {
+    if (str === '__fucq_undefined__') {
+        return undefined;
+    }
+    return JSON.parse(str);
+}
+
 var create = function (options) {
     var client = options.client;
     var key = options.key;
     var capacity = options.capacity;
+
+    var serialize = options.serialize || defaultSerialize;
+    var deserialize = options.deserialize || defaultDeserialize;
 
     var setKey = key + ':set';
     var listKey = key + ':list';
@@ -74,7 +91,7 @@ var create = function (options) {
         evalArgs.push(setKey); // KEYS[1]
         evalArgs.push(listKey); // KEYS[2]
         for (i = 0; i < argsCount; ++i) {
-            evalArgs.push(args[i]); // ARGV[1] ... ARGV[argsCount]
+            evalArgs.push(serialize(args[i])); // ARGV[1] ... ARGV[argsCount]
         }
         evalArgs.push(capacity); // ARGV[argCnt + 1]
         evalArgs.push(cb);
@@ -83,7 +100,14 @@ var create = function (options) {
     }
 
     function all(cb) {
-        client.lrange(listKey, 0, -1, cb);
+        client.lrange(listKey, 0, -1, function (err, arr) {
+            if (err) {
+                cb(err);
+                return;
+            }
+
+            cb(null, arr.map(function (item) { return deserialize(item); }));
+        });
     }
 
     function empty(cb) {
